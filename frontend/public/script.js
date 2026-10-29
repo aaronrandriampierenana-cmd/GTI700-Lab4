@@ -4,144 +4,89 @@
 // Adresse du backend
 const API_URL = "http://localhost:8080";
 
-// On recupere les elements HTML pour les valeurs
+// On recupere les elements de la page
 const tempActuelle = document.getElementById("temp-actuelle");
 const humActuelle = document.getElementById("hum-actuelle");
 const tempMoyenne = document.getElementById("temp-moyenne");
 const humMoyenne = document.getElementById("hum-moyenne");
 const tableTemp = document.getElementById("table-temp");
 const tableHum = document.getElementById("table-hum");
+const texteStatut = document.getElementById("texte-statut");
 
-
- // On garde les graphiques pour les modifier apres
+// On garde les graphique pour les mettre a jour
 let graphiqueTemp = null;
 let graphiqueHum = null;
 
+// On evite de lancer deux mise a jour en meme temps
+let chargement = false;
 
-
-
-// On recupere le statut de connexion
-const texteStatut = document.getElementById("texte-statut");
-
-// Fonction pour demander une valeur au backend
-async function recupererValeur(route) {
-    // On envoie la demande au serveur
-    const reponse = await fetch(API_URL + route);
-
-    // On verifie si la demande a fonctionner
-    if (!reponse.ok) {
-        throw new Error("Erreur HTTP : " + reponse.status);
+// Fonction pour verifier la reponse du serveur
+// Meme principe que dans annexe C.2
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.status + ": " + response.statusText);
     }
 
-    // On retourne les donnees recu
-    return await reponse.json();
+    return response;
 }
 
-// On affiche les 30 mesures dans un tableau
+// On fait une requete avec fetch comme dans l'annexe
+function recupererValeur(route) {
+    return fetch(API_URL + route)
+        .then(handleErrors)
+        .then(response => response.json());
+}
+
+// On affiche les mesure dans le tableau
 function afficherTableau(tableau, mesures) {
-    // On vide le tableau avant de mettre les nouvelles mesures
+    // On vide les anciennes lignes
     tableau.innerHTML = "";
 
-    // On passe sur chaque mesure recue
-    mesures.forEach((mesure) => {
+    // On ajoute chaque mesure
+    mesures.forEach(mesure => {
         const ligne = document.createElement("tr");
-
-        // La mesure contient ue date et une valeur
         const date = document.createElement("td");
         const valeur = document.createElement("td");
 
         date.textContent = mesure[0];
         valeur.textContent = mesure[1];
 
-        // On ajoute les deux case dans la ligne
         ligne.appendChild(date);
         ligne.appendChild(valeur);
-
-        // On ajoute la ligne au tableau
         tableau.appendChild(ligne);
     });
 }
 
-// Fonction pour afficher les valeurs des capteurs
-async function mettreAJourCapteurs() {
-    try {
-        // On recupere la temperature et l'humidite
-        const temperature = await recupererValeur("/capteurs/temp");
-        const humidite = await recupererValeur("/capteurs/hum");
+// On transforme la date pour garder seulement l'heure
+function obtenirHeure(timestamp) {
+    // On accepte une date en texte ou un timestamp numerique
+    let date;
 
-        // On affiche les valeurs dans la page
-        tempActuelle.textContent = temperature;
-        humActuelle.textContent = humidite;
-
-        // On recupere les 30 dernieres mesures
-        const historiqueTemp = await recupererValeur("/capteurs/temp/30");
-        const historiqueHum = await recupererValeur("/capteurs/hum/30");
-
-        // On recupere les moyennes des 30 mesures
-        const moyenneTemp = await recupererValeur("/capteurs/temp/30/moy");
-        const moyenneHum = await recupererValeur("/capteurs/hum/30/moy");
-
-        // On affiche que la connexion fonctionne
-        texteStatut.textContent = "Serveur connecte"; 
-
-        // On affiche les moyennes
-        tempMoyenne.textContent = moyenneTemp;
-        humMoyenne.textContent = moyenneHum;
-
-        // On remplit les deux tableaux
-        afficherTableau(tableTemp, historiqueTemp);
-        afficherTableau(tableHum, historiqueHum);
-
-        // On met les donnees des capteurs dans les graphiques
-        graphiqueTemp = afficherGraphique(
-            "graph-temp",
-            historiqueTemp,
-            "#e85d66",
-            graphiqueTemp
-        );
-
-        graphiqueHum = afficherGraphique(
-            "graph-hum",
-            historiqueHum,
-            "#4285e8",
-            graphiqueHum
-        );
-
-
-    } catch (erreur) {
-        // On affiche une erreur si le serveur repond pas
-        texteStatut.textContent = "Erreur de connexion";
-
-        // On affiche aussi l'erreur dans la console
-        console.error("Erreur des capteurs :", erreur);
+    if (typeof timestamp === "number") {
+        date = new Date(timestamp);
+    } else {
+        date = new Date(String(timestamp).replace(" ", "T"));
     }
+
+    // Si la date marche pas on affiche la valeur recu
+    if (isNaN(date.getTime())) {
+        return String(timestamp);
+    }
+
+    // Format HH:mm:ss
+    return [
+        String(date.getHours()).padStart(2, "0"),
+        String(date.getMinutes()).padStart(2, "0"),
+        String(date.getSeconds()).padStart(2, "0")
+    ].join(":");
 }
 
-
-// Fonction pour afficher les mesures dans un graphique
+// On cree ou on modifie un graphique
 function afficherGraphique(idCanvas, mesures, couleur, graphique) {
+    const heures = mesures.map(mesure => obtenirHeure(mesure[0]));
+    const valeurs = mesures.map(mesure => Number(mesure[1]));
 
-    // On recupere les heures des mesures
-    const heures = mesures.map((mesure) => {
-        const date = new Date(mesure[0].replace(" ", "T"));
-
-        // On garde seulement l'heure
-        if (isNaN(date.getTime())) {
-            return String(mesure[0]);
-        }
-
-        // On affiche l'heure avec le format HH:mm:ss
-        return [
-            String(date.getHours()).padStart(2, "0"),
-            String(date.getMinutes()).padStart(2, "0"),
-            String(date.getSeconds()).padStart(2, "0")
-        ].join(":");
-    });
-
-    // On recupere les valeurs des mesures
-    const valeurs = mesures.map((mesure) => Number(mesure[1]));
-
-    // Si le graphique existe deja on change les donnees
+    // Si le graphique existe on change juste les valeurs
     if (graphique !== null) {
         graphique.data.labels = heures;
         graphique.data.datasets[0].data = valeurs;
@@ -150,7 +95,7 @@ function afficherGraphique(idCanvas, mesures, couleur, graphique) {
         return graphique;
     }
 
-    // On cree le graphique si il existe pas encore
+    // Sinon on cree un nouveau graphique
     return new Chart(document.getElementById(idCanvas), {
         type: "line",
 
@@ -196,10 +141,75 @@ function afficherGraphique(idCanvas, mesures, couleur, graphique) {
     });
 }
 
+// On recupere les donnees des 6 routes
+function mettreAJourCapteurs() {
+    // On attend que la demande precedente finisse
+    if (chargement) {
+        return;
+    }
+
+    chargement = true;
+
+    // On demande les 6 valeurs au backend
+    Promise.all([
+        recupererValeur("/capteurs/temp"),
+        recupererValeur("/capteurs/hum"),
+        recupererValeur("/capteurs/temp/30"),
+        recupererValeur("/capteurs/hum/30"),
+        recupererValeur("/capteurs/temp/30/moy"),
+        recupererValeur("/capteurs/hum/30/moy")
+    ])
+    .then(data => {
+        // On recupere les reponse
+        const temperature = data[0];
+        const humidite = data[1];
+        const historiqueTemp = data[2];
+        const historiqueHum = data[3];
+        const moyenneTemp = data[4];
+        const moyenneHum = data[5];
+
+        // On affiche les valeur actuelle
+        tempActuelle.textContent = temperature;
+        humActuelle.textContent = humidite;
+
+        // On affiche les moyenne
+        tempMoyenne.textContent = moyenneTemp;
+        humMoyenne.textContent = moyenneHum;
+
+        // On rempli les tableaux
+        afficherTableau(tableTemp, historiqueTemp);
+        afficherTableau(tableHum, historiqueHum);
+
+        // On met a jour les deux graphique
+        graphiqueTemp = afficherGraphique(
+            "graph-temp",
+            historiqueTemp,
+            "#e85d66",
+            graphiqueTemp
+        );
+
+        graphiqueHum = afficherGraphique(
+            "graph-hum",
+            historiqueHum,
+            "#4285e8",
+            graphiqueHum
+        );
+
+        texteStatut.textContent = "Serveur connecte";
+    })
+    .catch(error => {
+        // On affiche une erreur si la connexion marche pas
+        texteStatut.textContent = "Erreur de connexion";
+        console.log("Une erreur est survenue: " + error);
+    })
+    .finally(() => {
+        chargement = false;
+    });
+}
 
 
-
-/* Test temporaire pour voir notre interface sans backend
+/*
+// Test temporaire pour voir notre interface sans backend
 function testerAffichage() {
 
     // Quelques mesures pour tester les tableaux
@@ -254,11 +264,10 @@ function testerAffichage() {
 
 // On teste notre affichage sans le backend
 testerAffichage();
-*/ 
+/*
 
+// On charge les donnees au debut
+// mettreAJourCapteurs();
 
-// On charge les donnees quand la page ouvre
-mettreAJourCapteurs();
-
-// On actualise les donnees chaque 3 secondes
-setInterval(mettreAJourCapteurs, 3000);
+// On recommence chaque 3 secondes
+// setInterval(mettreAJourCapteurs, 3000);

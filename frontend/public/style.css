@@ -1,0 +1,66 @@
+
+/* Style de la page */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+
+/* Titre principal */
+h1 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Les deux colonnes des capteurs */
+.capteurs {
+    display: flex;
+    gap: 20px;
+}
+
+/* Chaque capteur prend la moitier de la page */
+.capteur {
+    flex: 1;
+    min-width: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 15px;
+}
+
+/* Les titres des capteurs */
+h2 {
+    margin-top: 0;
+}
+
+/* On laisse de la place pour le graphique */
+.graphique {
+    height: 250px;
+    position: relative;
+    margin-bottom: 25px;
+}
+
+/* Le tableau prend toute la largeur */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Bordures des cases du tableau */
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+/* On permet de defiler dans le tableau */
+.tableau {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+/* Pour les petit ecrans on met une colonne */
+@media (max-width: 800px) {
+    .capteurs {
+        flex-direction: column;
+    }
+}

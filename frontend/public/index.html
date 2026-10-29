@@ -1,77 +1,217 @@
+
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+    <!-- On definit les caracteres utiliser dans notre page -->
     <meta charset="UTF-8">
+
+    <!-- On adapte la page aux ordinateurs et petits ecrans -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>GTI700 - Capteurs IoT</title>
+    <!-- Titre afficher dans l'onglet du navigateur -->
+    <title>GTI700 - Tableau de bord IoT</title>
+
+    <!-- On charge notre fichier css -->
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-    <!-- Titre principal de notre page -->
-    <h1>Laboratoire 4 - Donnees des capteurs</h1>
 
-    <!-- Cette section contient nos deux capteurs -->
-    <main>
+    <!-- Entete principale du tableau de bord -->
+    <header class="entete">
 
-        <!-- Partie pour afficher la temperature -->
-        <section id="temperature">
-            <h2>Temperature</h2>
+        <!-- Titre et description du laboratoire -->
+        <div>
+            <p class="sous-titre">GTI700 - Laboratoire 1</p>
 
-            <!-- La derniere valeur du capteur -->
-            <p>Valeur actuelle : <span id="temp-actuelle">--</span> °C</p>
+            <h1>Tableau de bord IoT</h1>
 
-            <!-- La moyenne des 30 dernieres valeurs -->
-            <p>Moyenne (30 mesures) : <span id="temp-moyenne">--</span> °C</p>
+            <p class="description">
+                Surveillance de la temperature et de l'humidite
+            </p>
+        </div>
 
-            <!-- Le graphique sera ajouter ici plus tard -->
-            <h3>Graphique</h3>
-            <canvas id="graph-temp"></canvas>
+        <!-- Le javascript changera le statut selon la connexion -->
+        <div class="statut" id="statut-connexion" role="status">
+            <span class="point-statut"></span>
+            <span id="texte-statut">En attente des donnees</span>
+        </div>
 
-            <!-- Tableau des 30 dernieres mesures -->
-            <h3>Historique</h3>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Heure</th>
-                        <th>Temperature (°C)</th>
-                    </tr>
-                </thead>
-                <tbody id="table-temp">
-                    <!-- Les lignes seront ajouter avec JavaScript -->
-                </tbody>
-            </table>
+    </header>
+
+    <!-- On place les deux capteurs dans notre grille -->
+    <main class="grille-capteurs">
+
+        <!-- Carte pour la temperature -->
+        <section class="carte carte-temperature" id="temperature">
+
+            <!-- Partie du haut avec le nom du capteur -->
+            <div class="entete-carte">
+
+                <div class="titre-carte">
+                    <span class="icone-capteur icone-temperature" aria-hidden="true">
+                        🌡️
+                    </span>
+
+                    <div>
+                        <p class="categorie">Capteur 01</p>
+                        <h2>Temperature</h2>
+                    </div>
+                </div>
+
+                <span class="etiquette">°C</span>
+            </div>
+
+            <!-- Valeur actuelle de la temperature -->
+            <div class="bloc-mesure">
+                <p class="libelle-mesure">Valeur actuelle</p>
+
+                <p class="valeur-principale">
+                    <span id="temp-actuelle">--</span>
+                    <span class="unite">°C</span>
+                </p>
+            </div>
+
+            <!-- Moyenne des 30 dernieres temperatures -->
+            <div class="bloc-moyenne">
+                <span>Moyenne des 30 dernieres mesures</span>
+
+                <strong>
+                    <span id="temp-moyenne">--</span> °C
+                </strong>
+            </div>
+
+            <!-- Partie du graphique de temperature -->
+            <div class="bloc-graphique">
+
+                <div class="titre-section">
+                    <h3>Evolution de la temperature</h3>
+                    <span>30 mesures</span>
+                </div>
+
+                <!-- Le javascript dessinera le graphique ici -->
+                <div class="conteneur-graphique">
+                    <canvas id="graph-temp"></canvas>
+                </div>
+
+            </div>
+
+            <!-- Partie de l'historique de temperature -->
+            <div class="bloc-historique">
+
+                <div class="titre-section">
+                    <h3>Historique</h3>
+                    <span>30 dernieres mesures</span>
+                </div>
+
+                <!-- On pourra defiler dans le tableau -->
+                <div class="conteneur-tableau">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Heure</th>
+                                <th>Temperature (°C)</th>
+                            </tr>
+                        </thead>
+
+                        <!-- Les 30 mesures seront ajouter ici -->
+                        <tbody id="table-temp"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
         </section>
 
-        <!-- Partie pour afficher l'humidite -->
-        <section id="humidite">
-            <h2>Humidite</h2>
+        <!-- Carte pour l'humidite -->
+        <section class="carte carte-humidite" id="humidite">
 
-            <!-- La derniere valeur du capteur -->
-            <p>Valeur actuelle : <span id="hum-actuelle">--</span> %</p>
+            <!-- Partie du haut avec le nom du capteur -->
+            <div class="entete-carte">
 
-            <!-- La moyenne des 30 dernieres valeurs -->
-            <p>Moyenne (30 mesures) : <span id="hum-moyenne">--</span> %</p>
+                <div class="titre-carte">
+                    <span class="icone-capteur icone-humidite" aria-hidden="true">
+                        💧
+                    </span>
 
-            <!-- Le graphique sera ajouter ici plus tard -->
-            <h3>Graphique</h3>
-            <canvas id="graph-hum"></canvas>
+                    <div>
+                        <p class="categorie">Capteur 02</p>
+                        <h2>Humidite</h2>
+                    </div>
+                </div>
 
-            <!-- Tableau des 30 dernieres mesures -->
-            <h3>Historique</h3>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Heure</th>
-                        <th>Humidite (%)</th>
-                    </tr>
-                </thead>
-                <tbody id="table-hum">
-                    <!-- Les lignes seront ajouter avec JavaScript -->
-                </tbody>
-            </table>
+                <span class="etiquette">%</span>
+            </div>
+
+            <!-- Valeur actuelle de l'humidite -->
+            <div class="bloc-mesure">
+                <p class="libelle-mesure">Valeur actuelle</p>
+
+                <p class="valeur-principale">
+                    <span id="hum-actuelle">--</span>
+                    <span class="unite">%</span>
+                </p>
+            </div>
+
+            <!-- Moyenne des 30 dernieres mesures d'humidite -->
+            <div class="bloc-moyenne">
+                <span>Moyenne des 30 dernieres mesures</span>
+
+                <strong>
+                    <span id="hum-moyenne">--</span> %
+                </strong>
+            </div>
+
+            <!-- Partie du graphique d'humidite -->
+            <div class="bloc-graphique">
+
+                <div class="titre-section">
+                    <h3>Evolution de l'humidite</h3>
+                    <span>30 mesures</span>
+                </div>
+
+                <!-- Le javascript dessinera le graphique ici -->
+                <div class="conteneur-graphique">
+                    <canvas id="graph-hum"></canvas>
+                </div>
+
+            </div>
+
+            <!-- Partie de l'historique d'humidite -->
+            <div class="bloc-historique">
+
+                <div class="titre-section">
+                    <h3>Historique</h3>
+                    <span>30 dernieres mesures</span>
+                </div>
+
+                <!-- On pourra defiler dans le tableau -->
+                <div class="conteneur-tableau">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Heure</th>
+                                <th>Humidite (%)</th>
+                            </tr>
+                        </thead>
+
+                        <!-- Les 30 mesures seront ajouter ici -->
+                        <tbody id="table-hum"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
         </section>
 
     </main>
+
+    <!-- Pied de page du laboratoire -->
+    <footer class="pied-page">
+        <p>GTI700 - Laboratoire 1 | Systeme de surveillance IoT</p>
+        <p>Actualisation automatique : toutes les 3 secondes</p>
+    </footer>
+
 </body>
 </html>

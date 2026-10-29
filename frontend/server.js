@@ -1,18 +1,19 @@
-// On importe express pour notre serveur web
-const express = require("express");
 
-// Path sert a trouver le chemin de notre fichier html
+const express = require("express");
 const path = require("path");
 
-// On cree notre application express
+// On cree notre application web avec express
 const app = express();
 
-// Le port demander pour le frontend
+// Port demander pour le frontend
 const PORT = 8889;
+
+// On permet au navigateur de charger le css et les fichiers public
+app.use(express.static(path.join(__dirname, "public")));
 
 // Cette route affiche notre page avec les deux capteurs
 app.get("/affichage", (req, res) => {
-    // On envoie le fichier html au navigateur
+    // On envoie notre fichier html au navigateur
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 

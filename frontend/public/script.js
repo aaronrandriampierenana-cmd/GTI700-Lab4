@@ -264,10 +264,10 @@ function testerAffichage() {
 
 // On teste notre affichage sans le backend
 testerAffichage();
-/*
+*/
 
 // On charge les donnees au debut
-// mettreAJourCapteurs();
+ mettreAJourCapteurs();
 
 // On recommence chaque 3 secondes
-// setInterval(mettreAJourCapteurs, 3000);
+ setInterval(mettreAJourCapteurs, 3000);

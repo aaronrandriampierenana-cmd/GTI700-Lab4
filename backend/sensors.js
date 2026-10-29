@@ -2,7 +2,7 @@ const { spawn } = require('child_process');
 const readline = require('readline');
 const path = require('path');
 
-const SCRIPT = path.join(__dirname, 'python', 'test_sensors.py');
+const SCRIPT = path.join(__dirname, 'python', 'sensors.py');
 const MAX = 720;
 
 const historiques = { temp: [], hum: [] }; // tableaux de [timestamp,valeur]

@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affichage des capteurs</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <h1>Temperature et humidite</h1>
+
+    <!-- On affiche si le serveur repond ou non -->
+    <p id="texte-statut">En attente des donnees</p>
+
+    <!-- Les deux capteurs sont afficher cote a cote -->
+    <main class="capteurs">
+
+        <!-- Partie temperature -->
+        <section class="capteur">
+            <h2>Temperature</h2>
+
+            <p>Valeur actuelle : <span id="temp-actuelle">--</span> °C</p>
+            <p>Moyenne des 30 mesures : <span id="temp-moyenne">--</span> °C</p>
+
+            <h3>Graphique temperature</h3>
+            <div class="graphique">
+                <canvas id="graph-temp"></canvas>
+            </div>
+
+            <h3>30 dernieres mesures</h3>
+            <div class="tableau">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date et heure</th>
+                            <th>Temperature (°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-temp"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Partie humidite -->
+        <section class="capteur">
+            <h2>Humidite</h2>
+
+            <p>Valeur actuelle : <span id="hum-actuelle">--</span> %</p>
+            <p>Moyenne des 30 mesures : <span id="hum-moyenne">--</span> %</p>
+
+            <h3>Graphique humidite</h3>
+            <div class="graphique">
+                <canvas id="graph-hum"></canvas>
+            </div>
+
+            <h3>30 dernieres mesures</h3>
+            <div class="tableau">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date et heure</th>
+                            <th>Humidite (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-hum"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Librairie pour les graphiques -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/script.js"></script>
+
+</body>
+</html>

@@ -12,6 +12,14 @@ const humMoyenne = document.getElementById("hum-moyenne");
 const tableTemp = document.getElementById("table-temp");
 const tableHum = document.getElementById("table-hum");
 
+
+ // On garde les graphiques pour les modifier apres
+let graphiqueTemp = null;
+let graphiqueHum = null;
+
+
+
+
 // On recupere le statut de connexion
 const texteStatut = document.getElementById("texte-statut");
 
@@ -84,6 +92,20 @@ async function mettreAJourCapteurs() {
         afficherTableau(tableTemp, historiqueTemp);
         afficherTableau(tableHum, historiqueHum);
 
+        // On met les donnees des capteurs dans les graphiques
+        graphiqueTemp = afficherGraphique(
+            "graph-temp",
+            historiqueTemp,
+            "#e85d66",
+            graphiqueTemp
+        );
+
+        graphiqueHum = afficherGraphique(
+            "graph-hum",
+            historiqueHum,
+            "#4285e8",
+            graphiqueHum
+        );
 
 
     } catch (erreur) {
@@ -95,7 +117,89 @@ async function mettreAJourCapteurs() {
     }
 }
 
-// Test temporaire pour voir notre interface sans backend
+
+// Fonction pour afficher les mesures dans un graphique
+function afficherGraphique(idCanvas, mesures, couleur, graphique) {
+
+    // On recupere les heures des mesures
+    const heures = mesures.map((mesure) => {
+        const date = new Date(mesure[0].replace(" ", "T"));
+
+        // On garde seulement l'heure
+        if (isNaN(date.getTime())) {
+            return String(mesure[0]);
+        }
+
+        // On affiche l'heure avec le format HH:mm:ss
+        return [
+            String(date.getHours()).padStart(2, "0"),
+            String(date.getMinutes()).padStart(2, "0"),
+            String(date.getSeconds()).padStart(2, "0")
+        ].join(":");
+    });
+
+    // On recupere les valeurs des mesures
+    const valeurs = mesures.map((mesure) => Number(mesure[1]));
+
+    // Si le graphique existe deja on change les donnees
+    if (graphique !== null) {
+        graphique.data.labels = heures;
+        graphique.data.datasets[0].data = valeurs;
+        graphique.update();
+
+        return graphique;
+    }
+
+    // On cree le graphique si il existe pas encore
+    return new Chart(document.getElementById(idCanvas), {
+        type: "line",
+
+        data: {
+            labels: heures,
+            datasets: [{
+                data: valeurs,
+                borderColor: couleur,
+                backgroundColor: couleur,
+                borderWidth: 2,
+                tension: 0.2,
+                pointRadius: 3,
+                fill: false
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: "Heure"
+                    }
+                },
+
+                y: {
+                    title: {
+                        display: true,
+                        text: "Valeur"
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+
+
+/* Test temporaire pour voir notre interface sans backend
 function testerAffichage() {
 
     // Quelques mesures pour tester les tableaux
@@ -126,15 +230,35 @@ function testerAffichage() {
     // On rempli les deux tableaux
     afficherTableau(tableTemp, historiqueTemp);
     afficherTableau(tableHum, historiqueHum);
+    
 
     // On indique que ce sont des donnees de test
     texteStatut.textContent = "Mode test - donnees fictives";
+
+    // On affiche les deux graphiques avec les donnees de test
+    graphiqueTemp = afficherGraphique(
+        "graph-temp",
+        historiqueTemp,
+        "#e85d66",
+        graphiqueTemp
+    );
+
+    graphiqueHum = afficherGraphique(
+        "graph-hum",
+        historiqueHum,
+        "#4285e8",
+        graphiqueHum
+    );
 }
 
 
 // On teste notre affichage sans le backend
 testerAffichage();
+*/ 
 
-// On desactive les appels API pendant notre test
-// mettreAJourCapteurs();
-// setInterval(mettreAJourCapteurs, 3000);
+
+// On charge les donnees quand la page ouvre
+mettreAJourCapteurs();
+
+// On actualise les donnees chaque 3 secondes
+setInterval(mettreAJourCapteurs, 3000);

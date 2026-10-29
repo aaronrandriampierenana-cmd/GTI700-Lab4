@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GTI700 - Capteurs IoT</title>
+</head>
+
+<body>
+    <!-- Titre principal de notre page -->
+    <h1>Laboratoire 4 - Donnees des capteurs</h1>
+
+    <!-- Cette section contient nos deux capteurs -->
+    <main>
+
+        <!-- Partie pour afficher la temperature -->
+        <section id="temperature">
+            <h2>Temperature</h2>
+
+            <!-- La derniere valeur du capteur -->
+            <p>Valeur actuelle : <span id="temp-actuelle">--</span> °C</p>
+
+            <!-- La moyenne des 30 dernieres valeurs -->
+            <p>Moyenne (30 mesures) : <span id="temp-moyenne">--</span> °C</p>
+
+            <!-- Le graphique sera ajouter ici plus tard -->
+            <h3>Graphique</h3>
+            <canvas id="graph-temp"></canvas>
+
+            <!-- Tableau des 30 dernieres mesures -->
+            <h3>Historique</h3>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Heure</th>
+                        <th>Temperature (°C)</th>
+                    </tr>
+                </thead>
+                <tbody id="table-temp">
+                    <!-- Les lignes seront ajouter avec JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Partie pour afficher l'humidite -->
+        <section id="humidite">
+            <h2>Humidite</h2>
+
+            <!-- La derniere valeur du capteur -->
+            <p>Valeur actuelle : <span id="hum-actuelle">--</span> %</p>
+
+            <!-- La moyenne des 30 dernieres valeurs -->
+            <p>Moyenne (30 mesures) : <span id="hum-moyenne">--</span> %</p>
+
+            <!-- Le graphique sera ajouter ici plus tard -->
+            <h3>Graphique</h3>
+            <canvas id="graph-hum"></canvas>
+
+            <!-- Tableau des 30 dernieres mesures -->
+            <h3>Historique</h3>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Heure</th>
+                        <th>Humidite (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="table-hum">
+                    <!-- Les lignes seront ajouter avec JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+</body>
+</html>

@@ -1,19 +1,22 @@
-// On importe express pour faire notre serveur web
+// On importe express pour notre serveur web
 const express = require("express");
 
-// On cree notre application
+// Path sert a trouver le chemin de notre fichier html
+const path = require("path");
+
+// On cree notre application express
 const app = express();
 
 // Le port demander pour le frontend
 const PORT = 8889;
 
-// Cette route sert a afficher notre page web
+// Cette route affiche notre page avec les deux capteurs
 app.get("/affichage", (req, res) => {
-    // Pour le moment on affiche juste un message pour tester
-    res.send("Bienvenue sur le front-end GTI700 !");
+    // On envoie le fichier html au navigateur
+    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// On demarre le serveur sur le port 8889
+// On demarre notre serveur web
 app.listen(PORT, () => {
     console.log(`Serveur demarrer : http://localhost:${PORT}/affichage`);
 });

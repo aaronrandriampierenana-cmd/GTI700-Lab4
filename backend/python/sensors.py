@@ -107,19 +107,25 @@ def read_dht11_dat():
 
 
 def lire_dht11(tentatives=2):
-    """Retourne (temperature, humidite), ou (None, None) si toutes les tentatives échouent.
-    Le DHT11 a besoin d'environ 1 s entre deux lectures."""
+    """Retourne (temperature, humidite), ou (None, None) si toutes les tentatives echouent."""
     for i in range(tentatives):
         resultat = read_dht11_dat()
+
         if resultat:
             humidite, temperature = resultat
+
+            print(
+                "humidity: %d %%, Temperature: %d C" % (humidite, temperature),
+                file=sys.stderr
+            )
+
             return float(temperature), float(humidite)
+
         if i < tentatives - 1:
             time.sleep(1)
-    print("DHT11 : lecture échouée", file=sys.stderr)
+
+    print("DHT11 : lecture echouee", file=sys.stderr)
     return None, None
-
-
 def arreter(signum, frame):
     GPIO.cleanup()
     sys.exit(0)

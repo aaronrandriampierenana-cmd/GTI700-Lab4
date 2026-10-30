@@ -5,7 +5,7 @@ const path = require('path');
 const SCRIPT = path.join(__dirname, 'python', 'sensors.py');
 const MAX = 720;
 
-const historiques = { temp: [], hum: [] }; // tableaux de [timestamp,valeur]
+const historiques = { hum: [] }; // tableaux de [timestamp,valeur]
 
 function ajouter(type, valeur) {
   if (valeur===null||valeur===undefined){
@@ -36,14 +36,9 @@ function moyenne(type,n){
     if (historiques[type].length===0){
         return null;
     }
-    if (historiques[type].length<n){
-        const somme = historiques[type].reduce((total,element)=>total+element[1],0);
-        return Number((somme/historiques[type].length).toFixed(1));
-    }
-    const liste=dernieres(type,n);
-        const somme = liste.reduce((total,element)=>total+element[1],0);
-        return Number((somme/n).toFixed(1)); // valeur arrondie à un chiffre
-    return null;
+    const liste=dernieres(type,n); // contient moins de n valeurs si l'historique est plus court
+    const somme = liste.reduce((total,element)=>total+element[1],0);
+    return Number((somme/liste.length).toFixed(1)); // valeur arrondie à un chiffre
 }
 
 let proc = null;
@@ -53,7 +48,6 @@ function demarrer() {
   readline.createInterface({ input: proc.stdout }).on('line', (ligne) => {
     try {
       const mesure = JSON.parse(ligne);
-      ajouter('temp', mesure.temp);
       ajouter('hum', mesure.hum);
     } catch (e) {
       console.error('Ligne ignorée (JSON invalide) :', ligne);
@@ -84,6 +78,6 @@ module.exports = { demarrer, derniere, dernieres, moyenne };
 if (require.main === module) {
   demarrer();
   setInterval(() => {
-    console.log(`Température : ${derniere('temp')} °C | Humidité : ${derniere('hum')} %`);
+    console.log(`Humidité : ${derniere('hum')} %`);
   }, 3000);
 }

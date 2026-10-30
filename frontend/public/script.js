@@ -1,8 +1,7 @@
 
 "use strict";
 
-// Adresse du backend
-const API_URL = "http://localhost:8080";
+// L'adresse du backend (API_URL) vient de /config.js, fourni par le serveur frontend
 
 // On recupere les elements de la page
 const tempActuelle = document.getElementById("temp-actuelle");

@@ -3,7 +3,7 @@ const cors = require('cors');
 const capteurs = require('./sensors');
 
 const PORT = 8080;
-const TYPES = ['temp', 'hum'];
+const TYPES = ['hum'];
 
 const app = express();
 app.use(cors());          // autorise le front (port 8889) à appeler cette API

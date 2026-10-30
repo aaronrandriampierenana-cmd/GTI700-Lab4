@@ -2,7 +2,7 @@
 "use strict";
 
 // Adresse du backend
-const API_URL = "http://localhost:8080";
+const API_URL = "http://192.168.122.56:8080";
 
 // On recupere les elements de la page
 const tempActuelle = document.getElementById("temp-actuelle");

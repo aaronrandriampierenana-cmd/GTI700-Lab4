@@ -1,58 +1,138 @@
 import RPi.GPIO as GPIO
-import PCF8591 as ADC
-import time, math, json, sys, signal
+import time, json, sys, signal
 
-PERIODE = 3 #secondes entre deux mesures
+PERIODE = 3 # secondes entre deux mesures
 DHTPIN = 17
-CANAL_TEMPERATURE = 1
 
 GPIO.setmode(GPIO.BCM)
 
 
-def lire_canal(canal):
-    ADC.read(canal)
-    return ADC.read(canal)
+MAX_UNCHANGE_COUNT = 100
+
+STATE_INIT_PULL_DOWN = 1
+STATE_INIT_PULL_UP = 2
+STATE_DATA_FIRST_PULL_DOWN = 3
+STATE_DATA_PULL_UP = 4
+STATE_DATA_PULL_DOWN = 5
 
 
-def temperature():
-    valeur = lire_canal(CANAL_TEMPERATURE)
-    Vr = 5 * float(valeur) / 255
-    if Vr <= 0 or Vr >= 5:
-        return None #si la valeur est hors de la plage
-    Rt = 10000 * Vr / (5 - Vr)
-    temp = 1 / ((math.log(Rt / 10000) / 3950) + (1 / (273.15 + 25)))
-    return round(temp - 273.15, 1)
+def read_dht11_dat():
+    GPIO.setup(DHTPIN, GPIO.OUT)
+    GPIO.output(DHTPIN, GPIO.HIGH)
+    time.sleep(0.05)
+    GPIO.output(DHTPIN, GPIO.LOW)
+    time.sleep(0.02)
+    GPIO.setup(DHTPIN, GPIO.IN, GPIO.PUD_UP)
+
+    unchanged_count = 0
+    last = -1
+    data = []
+    while True:
+        current = GPIO.input(DHTPIN)
+        data.append(current)
+        if last != current:
+            unchanged_count = 0
+            last = current
+        else:
+            unchanged_count += 1
+            if unchanged_count > MAX_UNCHANGE_COUNT:
+                break
+
+    state = STATE_INIT_PULL_DOWN
+    lengths = []
+    current_length = 0
+
+    for current in data:
+        current_length += 1
+
+        if state == STATE_INIT_PULL_DOWN:
+            if current == GPIO.LOW:
+                state = STATE_INIT_PULL_UP
+            else:
+                continue
+        if state == STATE_INIT_PULL_UP:
+            if current == GPIO.HIGH:
+                state = STATE_DATA_FIRST_PULL_DOWN
+            else:
+                continue
+        if state == STATE_DATA_FIRST_PULL_DOWN:
+            if current == GPIO.LOW:
+                state = STATE_DATA_PULL_UP
+            else:
+                continue
+        if state == STATE_DATA_PULL_UP:
+            if current == GPIO.HIGH:
+                current_length = 0
+                state = STATE_DATA_PULL_DOWN
+            else:
+                continue
+        if state == STATE_DATA_PULL_DOWN:
+            if current == GPIO.LOW:
+                lengths.append(current_length)
+                state = STATE_DATA_PULL_UP
+            else:
+                continue
+
+    if len(lengths) != 40:
+        return False
+
+    shortest_pull_up = min(lengths)
+    longest_pull_up = max(lengths)
+    halfway = (longest_pull_up + shortest_pull_up) / 2
+    bits = []
+    the_bytes = []
+    byte = 0
+
+    for length in lengths:
+        bit = 0
+        if length > halfway:
+            bit = 1
+        bits.append(bit)
+
+    for i in range(0, len(bits)):
+        byte = byte << 1
+        if bits[i]:
+            byte = byte | 1
+        else:
+            byte = byte | 0
+        if (i + 1) % 8 == 0:
+            the_bytes.append(byte)
+            byte = 0
+
+    checksum = (the_bytes[0] + the_bytes[1] + the_bytes[2] + the_bytes[3]) & 0xFF
+    if the_bytes[4] != checksum:
+        return False
+
+    return the_bytes[0], the_bytes[2]
 
 
-def lire_humidite(tentatives=2):
-    """Le DHT11 échoue souvent : on réessaie, en respectant ~1 s entre deux lectures."""
+def lire_dht11(tentatives=2):
+    """Retourne (temperature, humidite), ou (None, None) si toutes les tentatives échouent.
+    Le DHT11 a besoin d'environ 1 s entre deux lectures."""
     for i in range(tentatives):
         resultat = read_dht11_dat()
         if resultat:
-            humidite, _ = resultat     #on ignore la température du capteur d'humidité
-            return float(humidite)
+            humidite, temperature = resultat
+            return float(temperature), float(humidite)
         if i < tentatives - 1:
             time.sleep(1)
     print("DHT11 : lecture échouée", file=sys.stderr)
-    return None
+    return None, None
 
 
 def arreter(signum, frame):
-    # Node envoie SIGTERM en tuant le processus : KeyboardInterrupt n'est pas levé
     GPIO.cleanup()
     sys.exit(0)
 
 
 def main():
-    ADC.setup(0x48)
     signal.signal(signal.SIGTERM, arreter)
     signal.signal(signal.SIGINT, arreter)
 
     prochaine = time.monotonic()
     while True:
-        mesure = {"temp": temperature(), "hum": lire_humidite()}
-        print(json.dumps(mesure), flush=True)
-
+        temp, hum = lire_dht11()
+        print(json.dumps({"temp": temp, "hum": hum}), flush=True)
         prochaine += PERIODE
         time.sleep(max(0, prochaine - time.monotonic()))
 
